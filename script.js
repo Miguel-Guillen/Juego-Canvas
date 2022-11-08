@@ -1,12 +1,16 @@
+// evento escucha cuando carga
 window.addEventListener('load', function(){
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     canvas.width = 700;
     canvas.height = 500;
 
+    // clase input, permite reconocer cuando una tecla es precionada o se suelta una tecla
     class InputHandler{
         constructor(game){
             this.game = game;
+
+            // evento listen, escucha cuando una tecla se preciona 
             window.addEventListener('keydown', e => {
                 if(( (e.key === 'ArrowUp') || (e.key === 'ArrowDown') )&& this.game.keys.indexOf(e.key) === -1){
                     this.game.keys.push(e.key);
@@ -17,6 +21,7 @@ window.addEventListener('load', function(){
                 }
             });
 
+            // evento listen, escucha cuando una tecla se deja de precionar
             window.addEventListener('keyup', e => {
                 if(this.game.keys.indexOf(e.key)>-1){
                     this.game.keys.splice(this.game.keys.indexOf(e.key),1);
@@ -25,6 +30,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // clase proyectil, contiene los metodos y propiedades de los projectiles generados
     class Projectile{
         constructor(game, x, y){
             this.game = game;
@@ -36,6 +42,7 @@ window.addEventListener('load', function(){
             this.markedForDeletion = false;
         }
 
+        // metodo update, permite visualizar el cambio entre coordenadas simulando el desplazamiento
         update(){
             this.x += this.speed;
             if(this.x > this.game.width * 0.8){
@@ -46,6 +53,7 @@ window.addEventListener('load', function(){
             }
         }
 
+        // metodo draw, permite dibujarlo en pantalla
         draw(context){
             if(this.game.debug) context.fillStyle = 'yellow';
             else context.fillStyle = 'crimson';
@@ -53,7 +61,7 @@ window.addEventListener('load', function(){
         }
     }
 
-
+    // clase jugador, contiene los metodos y propiedades del jugador
     class Player{
         constructor(game){
             this.game = game;
@@ -71,6 +79,8 @@ window.addEventListener('load', function(){
             this.maxFrame = 37;
         }
 
+        // metodo update, permite los movimientos del jugador cuando una tecla sea precionada,
+        // ademas de contener la animacion de movimiento al cambiar de frame
         update(){
             if(this.game.keys.includes('ArrowUp')){
                 this.speedY = -this.maxSpeed;
@@ -98,6 +108,7 @@ window.addEventListener('load', function(){
             }
         }
 
+        // metodo draw, dibuja el jugador en pantalla
         draw(context){
             if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
             context.drawImage(
@@ -109,6 +120,7 @@ window.addEventListener('load', function(){
             })
         }
 
+        // metodo municion, permite la accion de crear un nuevo projectile cuando la tecla sea acccionada
         shootTop(){
             if(this.game.ammo > 0){
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30));
@@ -118,6 +130,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // metodo enemy, contiene las propiedades y funciones
     class Enemy {
         constructor(game){
             this.game = game;
@@ -131,6 +144,7 @@ window.addEventListener('load', function(){
             this.maxFrame = 37;
         }
 
+        // metodo update, permite mostrar la animacion de movimiento y desplazamiento
         update(){
             this.x += this.speedX - this.game.speed;
             if(this.x + this.width < 0){
@@ -143,6 +157,7 @@ window.addEventListener('load', function(){
             }
         }
 
+        // metodo draw, permite dibujarlo en pantalla
         draw(context){
             if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
             context.drawImage(
@@ -159,6 +174,8 @@ window.addEventListener('load', function(){
         }
     }
     
+    // metodo enemy1, contiene los parametros que tendra un tipo de enemigo en especifico 
+    // ademas de extenderse de la clase enemy principal
     class Angler1 extends Enemy {
         constructor(game){
             super(game);
@@ -171,6 +188,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // metodo enemy2, contiene los parametros que tendra un tipo de enemigo en especifico 
     class Angler2 extends Enemy {
         constructor(game){
             super(game);
@@ -183,6 +201,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // metodo enemy3, contiene los parametros que tendra un tipo de enemigo especial 
     class Lucky extends Enemy {
         constructor(game){
             super(game);
@@ -197,6 +216,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // clase layer, contiene las propiedades y funciones del escenario
     class Layer {
         constructor(game, image, speedModify){
             this.game = game;
@@ -208,17 +228,20 @@ window.addEventListener('load', function(){
             this.y = 0;
         }
 
+        // funcion que realiza el movimiento de desplazamiento en el escenario
         update(){
             if(this.x <= -this.width) this.x = 0;
             else this.x -= this.game.speed * this.speedModify;
         }
 
+        // metodo draw, dibuja el escenario en pantalla
         draw(context){
             context.drawImage(this.image, this.x, this.y);
             context.drawImage(this.image, this.x + this.width, this.y + this.height)
         }
     }
 
+    // clase escenarios, contiene las propiedades e imagenes a utilizar
     class Background {
         constructor(game){
             this.game = game;
@@ -233,15 +256,18 @@ window.addEventListener('load', function(){
             this.layers = [this.layer1, this.layer2, this.layer3];
         }
 
+        // funcion update, permite mandar a llamar la funcion layer principal
         update(){
             this.layers.forEach(layer => layer.update());
         }
 
+        // funcion update, manda llamar la funcion draw de layer
         draw(context){
             this.layers.forEach(layer => layer.draw(context));
         }
     }
 
+    // clase ui, contiene propiedades y funciones de la interfaz
     class UI{
         constructor(game){
             this.game = game;
@@ -250,6 +276,7 @@ window.addEventListener('load', function(){
             this.color = 'white';
         }
 
+        // metodo draw, contiene los detalles de la interfaz que son dibujado en pantalla
         draw(context){
             context.save();
             context.fillStyle = this.color;
@@ -290,6 +317,7 @@ window.addEventListener('load', function(){
         }
     }
 
+    // clase game, contiene todas las propiedades principales para el funcionamiento del juego
     class Game{
         constructor(width, height){
             this.width = width;
@@ -318,6 +346,7 @@ window.addEventListener('load', function(){
             this.powerDown = document.getElementById('powerDown');
         }
 
+        // metodo update, genera los intervalos de aparicion en las balas y enemigos
         update(deltaTime){
             if(!this.gameOver) this.gameTime += deltaTime;
             if(this.gameTime > this.timeLimit) this.gameOver = true;
@@ -373,6 +402,7 @@ window.addEventListener('load', function(){
             }
         }
 
+        // funcion draw, genera los elementos necesarios en pantalla (jugador, interfaz, escenario y enemigo)
         draw(context){
             this.background.draw(context);
             this.player.draw(context);
@@ -383,6 +413,7 @@ window.addEventListener('load', function(){
             this.background.layer4.draw(context);
         }
 
+        // funcion de choque cuando son tocados
         checkCollision(rect1, rect2){
             return (rect1.x < rect2.x + rect2.width && rect1.x + rect1.width >
                 rect2.x && rect1.y + rect2.y + rect2.height && rect1.height + rect1.y
@@ -390,6 +421,7 @@ window.addEventListener('load', function(){
             )
         }
 
+        // funcion addEnemy, genera los enemigos de manera aletoria
         addEnemy(){
             const randomize = Math.random();
             if(randomize < 0.3) this.enemies.push(new Angler1(this));
