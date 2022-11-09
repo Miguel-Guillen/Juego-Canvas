@@ -36,9 +36,13 @@ window.addEventListener('load', function(){
             this.game = game;
             this.x = x;
             this.y = y;
-            this.width = 10;
-            this.height = 4;
+            this.width = 38;
+            this.height = 19;
             this.speed = 3;
+            this.frameX = 0;
+            this.frameY = 0;
+            this.maxFrame = 4;
+            this.img = document.getElementById('projectile');
             this.markedForDeletion = false;
         }
 
@@ -51,13 +55,21 @@ window.addEventListener('load', function(){
             if(!this.game.debug){
                 this.speed = 6;
             }
+
+            if(this.frameX < this.maxFrame) this.frameX++;
+            else this.frameX = 0;
         }
 
         // metodo draw, permite dibujarlo en pantalla
         draw(context){
-            if(this.game.debug) context.fillStyle = 'yellow';
-            else context.fillStyle = 'crimson';
-            context.fillRect(this.x, this.y, this.width, this.height);
+            // if(this.game.debug) context.fillStyle = 'yellow';
+            // else context.fillStyle = 'crimson';
+
+            if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
+            context.drawImage(
+                this.img, this.frameX * this.width, this.frameY * this.height,
+                this.width, this.height, this.x, this.y, this.width, this.height
+            );
         }
     }
 
@@ -358,7 +370,6 @@ window.addEventListener('load', function(){
                     this.ammo++;
                     this.ammoTimer = 0;
                 }
-                
             }else{
                 this.ammoTimer += deltaTime;
             }
